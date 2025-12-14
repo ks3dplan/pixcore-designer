@@ -83,3 +83,43 @@ html, body {
 #export-area {
   overflow: visible;   /* 或直接删除整个 overflow */
 }
+/* 所有颜色按钮的共用样式 */
+.color-btn {
+  min-width: 70px;
+  padding: 6px 10px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* 各自颜色 */
+.color-btn.white {
+  background: #ffffff;
+  color: #000000;
+}
+
+.color-btn.black {
+  background: #000000;
+  color: #ffffff;
+}
+
+.color-btn.red {
+  background: #ff0000;
+  color: #ffffff;
+}
+
+.color-btn.green {
+  background: #00aa00;
+  color: #ffffff;
+}
+
+.color-btn.blue {
+  background: #0066ff;
+  color: #ffffff;
+}
+
+.color-btn.yellow {
+  background: #ffcc00;
+  color: #000000;
+}

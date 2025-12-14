@@ -22,16 +22,16 @@
 
   <div class="controls">
   <div class="color-buttons">
-    <button onclick="setColor('white')">White</button>
-    <button onclick="setColor('black')">Black</button>
-    <button onclick="setColor('red')">Red</button>
-    <button onclick="setColor('green')">Green</button>
-    <button onclick="setColor('blue')">Blue</button>
-    <button onclick="setColor('yellow')">Yellow</button>
+      <button class="color-btn white"  onclick="setColor('white')">White</button>
+  <button class="color-btn black"  onclick="setColor('black')">Black</button>
+  <button class="color-btn red"    onclick="setColor('red')">Red</button>
+  <button class="color-btn green"  onclick="setColor('green')">Green</button>
+  <button class="color-btn blue"   onclick="setColor('blue')">Blue</button>
+  <button class="color-btn yellow" onclick="setColor('yellow')">Yellow</button>
+    <button onclick="eraseAll()">Reset</button>
   </div>
 
   <div class="action-buttons">
-    <button onclick="eraseAll()">Reset</button>
     <button onclick="exportPNG()">Download PNG</button>
   </div>
 </div>
