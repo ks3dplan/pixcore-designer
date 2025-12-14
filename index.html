@@ -17,25 +17,35 @@
 </head>
 <body>
 
-<h3>PIXCORE · Pixel Designer 10x 15</h3>
+<div class="app">
+  <h3>PIXCORE · Pixel Designer</h3>
 
-<div class="controls">
-  <button onclick="setColor('white')">White</button>
-  <button onclick="setColor('black')">Black</button>
-  <button onclick="setColor('red')">Red</button>
-  <button onclick="setColor('green')">Green</button>
-  <button onclick="setColor('blue')">Blue</button>
-  <button onclick="setColor('yellow')">Yellow</button>
-  <button onclick="eraseAll()">Reset</button>
+  <div class="controls">
+  <div class="color-buttons">
+    <button onclick="setColor('white')">White</button>
+    <button onclick="setColor('black')">Black</button>
+    <button onclick="setColor('red')">Red</button>
+    <button onclick="setColor('green')">Green</button>
+    <button onclick="setColor('blue')">Blue</button>
+    <button onclick="setColor('yellow')">Yellow</button>
+  </div>
+
+  <div class="action-buttons">
+    <button onclick="eraseAll()">Reset</button>
+    <button onclick="exportPNG()">Download PNG</button>
+  </div>
 </div>
 
-<div id="export-area">
-  <div id="grid"></div>
+
+  <div id="export-area">
+    <div id="grid"></div>
+  </div>
 </div>
 
-<button onclick="exportPNG()">Download PNG</button>
-
+<!-- 一定要先加载 html2canvas -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<!-- 再加载你自己的 JS -->
 <script src="script.js"></script>
 
 </body>

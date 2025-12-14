@@ -1,9 +1,11 @@
+const CELL_SIZE = 24; // ← 改尺寸只改这里（24 手机 / 30 桌面）
+
 const grid = document.getElementById("grid");
 
 /* ====== 只改这里就能换尺寸 ====== */
 const GRID = {
-  cols: 10,   // 横向数量
-  rows: 15   // 纵向数量
+  cols: 10,
+  rows: 15
 };
 /* ================================= */
 
@@ -11,6 +13,7 @@ let currentColor = "black";
 
 /* 设置 grid 结构 */
 grid.style.gridTemplateColumns = `repeat(${GRID.cols}, 30px)`;
+
 
 /* 清空旧格子 */
 grid.innerHTML = "";
@@ -49,22 +52,21 @@ function setColor(color) {
 /* 清空全部 */
 function eraseAll() {
   document.querySelectorAll(".pixel").forEach(pixel => {
-    pixel.classList.remove(
-      "black",
-      "red",
-      "green",
-      "blue",
-      "yellow"
-    );
-    pixel.classList.add("white");
+    pixel.className = "pixel white";
   });
 }
 
-/* 导出 PNG */
+/* 导出 PNG（稳定版） */
 function exportPNG() {
-  html2canvas(document.getElementById("export-area"), {
+  const exportArea = document.getElementById("export-area");
+
+  // ⭐ 强制 reflow（非常重要）
+  exportArea.style.display = "inline-block";
+
+  html2canvas(exportArea, {
     backgroundColor: "#ffffff",
-    scale: 3
+    scale: 3,
+    useCORS: true
   }).then(canvas => {
     const link = document.createElement("a");
     link.download = "pixcore-design.png";

@@ -1,19 +1,48 @@
-body {
+:root {
+  --cell-size: 24px;   /* ← 改尺寸只改这里 */
+  --cell-gap: 6px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
   font-family: system-ui, sans-serif;
-  padding: 20px;
 }
 
+/* 整个 App 固定为内容宽度 */
+.app {
+  margin: 20px auto;
+  padding: 16px;
+  width: max-content;     /* ⭐ 关键：不要让浏览器乱算 */
+}
+
+/* 按钮 */
 .controls {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-button {
-  margin-right: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
+/* 上面颜色按钮 */
+.color-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
-/* grid 只负责 display */
+/* 下面操作按钮 */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* 可选：让 Download 看起来重要一点 */
+.action-buttons button:last-child {
+  font-weight: bold;
+}
+
+
+/* Grid 本体 */
 #grid {
   display: grid;
   gap: 6px;
@@ -25,19 +54,19 @@ button {
   height: 30px;
   background: #ffffff;
   border: 1px solid #ccc;
-  cursor: pointer;
   position: relative;
+  cursor: pointer;
 }
 
 /* 颜色 */
-.pixel.white { background: #ffffff; }
-.pixel.black { background: #000000; }
-.pixel.red   { background: #ff0000; }
-.pixel.green { background: #00ff00; }
+.pixel.white  { background: #ffffff; }
+.pixel.black  { background: #000000; }
+.pixel.red    { background: #ff0000; }
+.pixel.green  { background: #00ff00; }
 .pixel.blue   { background: #0066ff; }
 .pixel.yellow { background: #ffcc00; }
 
-/* A1 / B2 标注 */
+/* A1 / B2 标签 */
 .pixel::after {
   content: attr(data-label);
   position: absolute;
@@ -50,7 +79,5 @@ button {
 
 /* 导出区域 */
 #export-area {
-  display: inline-block;
-  padding: 8px;
-  background: #ffffff;
+  overflow-x: auto;
 }
