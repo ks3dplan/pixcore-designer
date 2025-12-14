@@ -1,3 +1,8 @@
+let undoStack = [];
+let redoStack = [];
+
+let currentStroke = null; // ⭐ 当前这一笔
+
 let isPainting = false;
 
 const CELL_SIZE = 30; // 如果要手机小一点，改成 24
@@ -27,19 +32,44 @@ let currentColor = "black";
       const colLabel = c + 1;
       pixel.dataset.label = `${rowLabel}${colLabel}`;
 
-      pixel.addEventListener("mousedown", () => {
-        isPainting = true;
-        paintPixel(pixel);
-      });
+ pixel.addEventListener("mousedown", () => {
+  isPainting = true;
 
-      pixel.addEventListener("mouseenter", () => {
-        if (isPainting) paintPixel(pixel);
-      });
+  currentStroke = {
+    actions: [],
+    changed: new Set()
+  };
 
-      pixel.addEventListener("touchstart", () => {
-        isPainting = true;
-        paintPixel(pixel);
-      });
+  paintPixel(pixel);
+});
+
+pixel.addEventListener("mouseenter", () => {
+  if (isPainting) {
+    paintPixel(pixel);
+  }
+});
+
+/* 📱 手机 */
+pixel.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  isPainting = true;
+
+  currentStroke = {
+    actions: [],
+    changed: new Set()
+  };
+
+  paintPixel(pixel);
+});
+
+pixel.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el && el.classList.contains("pixel")) {
+    paintPixel(el);
+  }
+});
 
       pixel.addEventListener("touchmove", (e) => {
         e.preventDefault();
@@ -56,16 +86,40 @@ let currentColor = "black";
 }
 
 /* ===== 结束拖拉 ===== */
-document.addEventListener("mouseup", () => {
+document.addEventListener("mouseup", finishStroke);
+document.addEventListener("touchend", finishStroke);
+
+function finishStroke() {
+  if (!isPainting) return;
   isPainting = false;
-});
-document.addEventListener("touchend", () => {
-  isPainting = false;
-});
+
+  if (currentStroke && currentStroke.actions.length > 0) {
+    undoStack.push(currentStroke);
+    redoStack = [];
+  }
+
+  currentStroke = null;
+}
 
 /* ===== 上色函数 ===== */
-function paintPixel(p) {
-  p.classList.remove(
+function paintPixel(pixel) {
+  if (!currentStroke) return;
+
+  const prevColor = pixel.dataset.color || "white";
+  if (prevColor === currentColor) return;
+
+  // 防止同一格在同一笔里被记录多次
+  if (currentStroke.changed.has(pixel)) return;
+
+  currentStroke.changed.add(pixel);
+
+  currentStroke.actions.push({
+    pixel,
+    from: prevColor,
+    to: currentColor
+  });
+
+  pixel.classList.remove(
     "white",
     "black",
     "red",
@@ -73,19 +127,44 @@ function paintPixel(p) {
     "blue",
     "yellow"
   );
-  p.classList.add(currentColor);
+
+  pixel.classList.add(currentColor);
+  pixel.dataset.color = currentColor;
+}
+
+function undo() {
+  const stroke = undoStack.pop();
+  if (!stroke) return;
+
+  redoStack.push(stroke);
+
+  stroke.actions.forEach(action => {
+    action.pixel.classList.remove(
+      "white","black","red","green","blue","yellow"
+    );
+    action.pixel.classList.add(action.from);
+    action.pixel.dataset.color = action.from;
+  });
+}
+
+function redo() {
+  const stroke = redoStack.pop();
+  if (!stroke) return;
+
+  undoStack.push(stroke);
+
+  stroke.actions.forEach(action => {
+    action.pixel.classList.remove(
+      "white","black","red","green","blue","yellow"
+    );
+    action.pixel.classList.add(action.to);
+    action.pixel.dataset.color = action.to;
+  });
 }
 
 /* ===== 选择颜色 ===== */
 function setColor(color) {
   currentColor = color;
-}
-
-/* ===== 清空 ===== */
-function eraseAll() {
-  document.querySelectorAll(".pixel").forEach(p => {
-    p.className = "pixel white";
-  });
 }
 
 /* ===== 导出 PNG ===== */
