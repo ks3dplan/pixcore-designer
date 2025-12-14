@@ -81,8 +81,11 @@ html, body {
 }
 
 #export-area {
-  overflow: visible;   /* 或直接删除整个 overflow */
+  overflow: visible;   /* ❗ 关键 */
+  display: inline-block;
+  background: #ffffff;
 }
+
 /* 所有颜色按钮的共用样式 */
 .color-btn {
   min-width: 70px;

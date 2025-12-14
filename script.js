@@ -1,67 +1,101 @@
-const CELL_SIZE = 24; // ← 改尺寸只改这里（24 手机 / 30 桌面）
+let isPainting = false;
+
+const CELL_SIZE = 30; // 如果要手机小一点，改成 24
 
 const grid = document.getElementById("grid");
 
-/* ====== 只改这里就能换尺寸 ====== */
-const GRID = {
+/* ====== 网格尺寸 ====== */
+let GRID = {
   cols: 10,
   rows: 15
 };
-/* ================================= */
+/* ===================== */
 
 let currentColor = "black";
 
-/* 设置 grid 结构 */
-grid.style.gridTemplateColumns = `repeat(${GRID.cols}, 30px)`;
+ function buildGrid() {
+  grid.innerHTML = "";
 
+  grid.style.gridTemplateColumns = `repeat(${GRID.cols}, 30px)`;
 
-/* 清空旧格子 */
-grid.innerHTML = "";
+  for (let r = 0; r < GRID.rows; r++) {
+    for (let c = 0; c < GRID.cols; c++) {
+      const pixel = document.createElement("div");
+      pixel.className = "pixel white";
 
-/* 生成像素 */
-for (let r = 0; r < GRID.rows; r++) {
-  for (let c = 0; c < GRID.cols; c++) {
-    const pixel = document.createElement("div");
-    pixel.className = "pixel white";
+      const rowLabel = String.fromCharCode(65 + r);
+      const colLabel = c + 1;
+      pixel.dataset.label = `${rowLabel}${colLabel}`;
 
-    const rowLabel = String.fromCharCode(65 + r); // A, B, C...
-    const colLabel = c + 1;
-    pixel.dataset.label = `${rowLabel}${colLabel}`;
+      pixel.addEventListener("mousedown", () => {
+        isPainting = true;
+        paintPixel(pixel);
+      });
 
-    pixel.onclick = () => {
-      pixel.classList.remove(
-        "white",
-        "black",
-        "red",
-        "green",
-        "blue",
-        "yellow"
-      );
-      pixel.classList.add(currentColor);
-    };
+      pixel.addEventListener("mouseenter", () => {
+        if (isPainting) paintPixel(pixel);
+      });
 
-    grid.appendChild(pixel);
+      pixel.addEventListener("touchstart", () => {
+        isPainting = true;
+        paintPixel(pixel);
+      });
+
+      pixel.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        if (el && el.classList.contains("pixel")) {
+          paintPixel(el);
+        }
+      });
+
+      grid.appendChild(pixel);
+    }
   }
 }
 
-/* 选择颜色 */
+/* ===== 结束拖拉 ===== */
+document.addEventListener("mouseup", () => {
+  isPainting = false;
+});
+document.addEventListener("touchend", () => {
+  isPainting = false;
+});
+
+/* ===== 上色函数 ===== */
+function paintPixel(p) {
+  p.classList.remove(
+    "white",
+    "black",
+    "red",
+    "green",
+    "blue",
+    "yellow"
+  );
+  p.classList.add(currentColor);
+}
+
+/* ===== 选择颜色 ===== */
 function setColor(color) {
   currentColor = color;
 }
 
-/* 清空全部 */
+/* ===== 清空 ===== */
 function eraseAll() {
-  document.querySelectorAll(".pixel").forEach(pixel => {
-    pixel.className = "pixel white";
+  document.querySelectorAll(".pixel").forEach(p => {
+    p.className = "pixel white";
   });
 }
 
-/* 导出 PNG（稳定版） */
+/* ===== 导出 PNG ===== */
 function exportPNG() {
   const exportArea = document.getElementById("export-area");
+  const grid = document.getElementById("grid");
 
-  // ⭐ 强制 reflow（非常重要）
-  exportArea.style.display = "inline-block";
+  // ⭐ 强制 export-area 跟 grid 一样大
+  exportArea.style.width = grid.scrollWidth + "px";
+  exportArea.style.height = grid.scrollHeight + "px";
 
   html2canvas(exportArea, {
     backgroundColor: "#ffffff",
@@ -74,3 +108,20 @@ function exportPNG() {
     link.click();
   });
 }
+
+function setOrientation(mode) {
+  if (mode === "portrait") {
+    GRID.cols = 10;
+    GRID.rows = 15;
+  }
+
+  if (mode === "landscape") {
+    GRID.cols = 15;
+    GRID.rows = 10;
+  }
+
+  buildGrid();
+}
+
+// ⭐⭐ 非常重要：第一次载入要执行一次
+buildGrid();
