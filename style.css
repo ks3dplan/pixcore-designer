@@ -1,83 +1,133 @@
 :root {
-  --cell-size: 24px;   /* ← 改尺寸只改这里 */
+  --cell-size: 30px;
   --cell-gap: 6px;
 }
 
+/* ===== 基础 ===== */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden;   
+  overflow-x: hidden;
   background: #ffffff;
   font-family: system-ui, sans-serif;
 }
 
-/* 整个 App 固定为内容宽度 */
 .app {
-  margin: 20px auto;
-  padding: 16px;
-  width: max-content;     /* ⭐ 关键：不要让浏览器乱算 */
+  padding: 20px;
 }
 
-/* 按钮 */
-.controls {
+/* ===== 标题 ===== */
+.app-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px; /* ⭐ 加这行 */
+}
+
+/* ===== 方向 ===== */
+.orientation-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.orientation-bar button {
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ===== 主布局 ===== */
+.app-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* ===== 左侧颜色 ===== */
+.color-panel {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* 三行之间的距离 */
-}
-
-.control-group {
-  display: flex;
-  gap: 6px; /* 同一行按钮之间 */
-  flex-wrap: wrap;
-}
-
-/* 上面颜色按钮 */
-.color-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-
-/* 下面操作按钮 */
-.action-buttons {
-  display: flex;
   gap: 10px;
 }
 
-/* 可选：让 Download 看起来重要一点 */
-.action-buttons button:last-child {
+.color {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 11px;
   font-weight: bold;
 }
 
+.color span { color: #000; }
+.color.black span,
+.color.blue span,
+.color.red span,
+.color.purple span { color: #fff; }
 
-/* Grid 本体 */
+/* 颜色定义 */
+.color.white  { background: #ffffff; }
+.color.black  { background: #000000; }
+.color.gray   { background: #bfc6c9; }
+.color.red    { background: #e53935; }
+.color.orange { background: #ff8800; }
+.color.yellow { background: #ffcc00; }
+.color.green  { background: #00b894; }
+.color.blue   { background: #1565c0; }
+.color.pink   { background: #ff6fae; }
+.color.purple { background: #7e57c2; }
+
+/* ===== 中间 ===== */
+.main-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.top-tools {
+  display: flex;
+  gap: 12px;
+}
+
+.big-btn {
+  font-size: 16px;
+  padding: 8px 18px;
+}
+
+/* ===== Grid ===== */
+#export-area {
+  display: inline-block;
+  background: #fff;
+}
+
 #grid {
   display: grid;
-  gap: 6px;
-  overflow: visible;   /* 防止被当成滚动容器 */
-} 
+  gap: var(--cell-gap);
+}
 
-/* 像素格 */
 .pixel {
-  width: 30px;
-  height: 30px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   background: #ffffff;
   border: 1px solid #ccc;
   position: relative;
   cursor: pointer;
 }
 
-/* 颜色 */
-.pixel.white  { background: #ffffff; }
-.pixel.black  { background: #000000; }
-.pixel.red    { background: #ff0000; }
-.pixel.green  { background: #00ff00; }
-.pixel.blue   { background: #0066ff; }
-.pixel.yellow { background: #ffcc00; }
-
-/* A1 / B2 标签 */
 .pixel::after {
   content: attr(data-label);
   position: absolute;
@@ -88,49 +138,29 @@ html, body {
   pointer-events: none;
 }
 
-#export-area {
-  overflow: visible;   /* ❗ 关键 */
-  display: inline-block;
-  background: #ffffff;
+/* pixel 颜色 */
+.pixel.white  { background: #ffffff; }
+.pixel.black  { background: #000000; }
+.pixel.gray   { background: #bfc6c9; }
+.pixel.red    { background: #e53935; }
+.pixel.orange { background: #ff8800; }
+.pixel.yellow { background: #ffcc00; }
+.pixel.green  { background: #00b894; }
+.pixel.blue   { background: #1565c0; }
+.pixel.pink   { background: #ff6fae; }
+.pixel.purple { background: #7e57c2; }
+
+/* ===== 右侧 ===== */
+.right-panel {
+  display: flex;
+  align-items: flex-start;
 }
 
-/* 所有颜色按钮的共用样式 */
-.color-btn {
-  min-width: 70px;
-  padding: 6px 10px;
-  border: 1px solid #888;
-  border-radius: 4px;
+.download-btn {
+  padding: 14px 26px;
+  font-size: 18px;
+  font-weight: 700;
+  border: 2px solid #000;
+  background: #fff;
   cursor: pointer;
-  font-weight: 600;
-}
-
-/* 各自颜色 */
-.color-btn.white {
-  background: #ffffff;
-  color: #000000;
-}
-
-.color-btn.black {
-  background: #000000;
-  color: #ffffff;
-}
-
-.color-btn.red {
-  background: #ff0000;
-  color: #ffffff;
-}
-
-.color-btn.green {
-  background: #00ff00;
-  color: #000000;
-}
-
-.color-btn.blue {
-  background: #0066ff;
-  color: #ffffff;
-}
-
-.color-btn.yellow {
-  background: #ffcc00;
-  color: #000000;
 }

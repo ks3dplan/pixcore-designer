@@ -122,13 +122,17 @@ function paintPixel(pixel) {
   });
 
   pixel.classList.remove(
-    "white",
-    "black",
-    "red",
-    "green",
-    "blue",
-    "yellow"
-  );
+  "white",
+  "black",
+  "gray",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "pink",
+  "purple"
+);
 
   pixel.classList.add(currentColor);
   pixel.dataset.color = currentColor;
@@ -142,7 +146,7 @@ function undo() {
 
   stroke.actions.forEach(action => {
     action.pixel.classList.remove(
-      "white","black","red","green","blue","yellow"
+      "white","black","gray","red", "orange", "yellow", "green","blue","pink", "purple"
     );
     action.pixel.classList.add(action.from);
     action.pixel.dataset.color = action.from;
@@ -157,7 +161,7 @@ function redo() {
 
   stroke.actions.forEach(action => {
     action.pixel.classList.remove(
-      "white","black","red","green","blue","yellow"
+      "white","black","gray","red", "orange", "yellow", "green","blue","pink", "purple"
     );
     action.pixel.classList.add(action.to);
     action.pixel.dataset.color = action.to;

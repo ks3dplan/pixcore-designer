@@ -15,46 +15,56 @@
   <title>PIXCORE Designer</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-<div class="app">
-  <h3>PIXCORE (10px X 15px)</h3>
-  
-<div class="controls">
-  <div class="control-group">
-    <button onclick="setOrientation('portrait')">Portrait</button>
-    <button onclick="setOrientation('landscape')">Landscape</button>
-      <div class="action-buttons">
-     </div>
-     </div>
-      
- <div class="control-group">
-        <button onclick="undo()">Undo</button>
-<button onclick="redo()">Redo</button>
-    <button onclick="exportPNG()">Download PNG</button>
+  <!-- 顶部区域 -->
+  <div class="top-header">
+    <h1 class="app-title">PIXCORE (10px × 15px)</h1>
+
+    <div class="orientation-row">
+      <button class="orient-btn" onclick="setOrientation('portrait')">Portrait</button>
+      <button class="orient-btn" onclick="setOrientation('landscape')">Landscape</button>
+    </div>
+
+    <hr class="divider">
+
+    <div class="action-row">
+      <button class="big-btn" onclick="undo()">Undo</button>
+      <button class="big-btn" onclick="redo()">Redo</button>
+      <button class="download-btn" onclick="exportPNG()">Download PNG</button>
+    </div>
   </div>
 
-  <div class="color-buttons">
-      <button class="color-btn white"  onclick="setColor('white')">White</button>
-  <button class="color-btn black"  onclick="setColor('black')">Black</button>
-  <button class="color-btn red"    onclick="setColor('red')">Red</button>
-  <button class="color-btn green"  onclick="setColor('green')">Green</button>
-  <button class="color-btn blue"   onclick="setColor('blue')">Blue</button>
-  <button class="color-btn yellow" onclick="setColor('yellow')">Yellow</button>
+  <!-- 主体区域：左颜色 + 右画布 -->
+  <div class="app-layout">
+
+    <!-- 左侧颜色栏 -->
+    <div class="color-panel">
+      <button class="color white"  onclick="setColor('white')"><span>600</span></button>
+      <button class="color black"  onclick="setColor('black')"><span>611</span></button>
+      <button class="color gray"   onclick="setColor('gray')"><span>647</span></button>
+      <button class="color red"    onclick="setColor('red')"><span>694</span></button>
+      <button class="color orange" onclick="setColor('orange')"><span>604</span></button>
+      <button class="color yellow" onclick="setColor('yellow')"><span>603</span></button>
+      <button class="color green"  onclick="setColor('green')"><span>609</span></button>
+      <button class="color blue"   onclick="setColor('blue')"><span>680</span></button>
+      <button class="color pink"   onclick="setColor('pink')"><span>612</span></button>
+      <button class="color purple" onclick="setColor('purple')"><span>607</span></button>
+    </div>
+
+    <!-- 中间画布（⚠️ 你刚刚少掉的就是这里） -->
+    <div class="main-area">
+      <div id="export-area">
+        <div id="grid"></div>
+      </div>
+    </div>
+
   </div>
-</div>
 
-
-  <div id="export-area">
-    <div id="grid"></div>
-  </div>
-</div>
-
-<!-- 一定要先加载 html2canvas -->
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
-<!-- 再加载你自己的 JS -->
-<script src="script.js"></script>
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="script.js"></script>
 
 </body>
 </html>
