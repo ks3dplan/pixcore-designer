@@ -183,14 +183,3 @@ html, body {
   /* ⭐ 只允许双指 pan / zoom */
   touch-action: pan-x pan-y pinch-zoom;
 }
-
-// 🚫 禁止单指滚动（只保留画画）
-document.getElementById("grid-wrapper").addEventListener(
-  "touchmove",
-  (e) => {
-    if (e.touches.length === 1) {
-      e.preventDefault(); // ⭐ 禁止单指滚动
-    }
-  },
-  { passive: false }
-);
