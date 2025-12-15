@@ -164,3 +164,28 @@ html, body {
   background: #fff;
   cursor: pointer;
 }
+
+/* 当前选中颜色高亮 */
+.color.active {
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 2px #000000;
+}
+
+/* 负责双指滚 / 缩 */
+#grid-wrapper {
+  overflow: auto;
+  max-width: 100vw;
+  max-height: 80vh;
+
+  touch-action: pan-x pan-y; /* ⭐ 允许双指 */
+}
+
+/* 画布 */
+#grid {
+  display: grid;
+}
+
+/* pixel：只给 JS 用 */
+.pixel {
+  touch-action: none; /* ⭐ 禁止浏览器单指滚 */
+}

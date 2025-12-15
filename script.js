@@ -1,9 +1,8 @@
 let undoStack = [];
 let redoStack = [];
 
-let currentStroke = null; // ⭐ 当前这一笔
-
 let isPainting = false;
+let currentStroke = null; // ⭐ 当前这一笔
 
 const CELL_SIZE = 30; // 如果要手机小一点，改成 24
 
@@ -51,40 +50,47 @@ pixel.addEventListener("mouseenter", () => {
 });
 
 /* 📱 手机 */
-pixel.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  isPainting = true;
+/* ===== 手机：pixel 只处理单指画 ===== */
 
+pixel.addEventListener("touchstart", (e) => {
+  if (e.touches.length !== 1) return;
+
+  e.preventDefault(); // 阻止单指滚动
+
+  isPainting = true;
   currentStroke = {
     actions: [],
     changed: new Set()
   };
 
-  setTimeout(() => paintPixel(pixel), 0);
+  paintPixel(pixel);
 });
 
+pixel.addEventListener(
+  "touchmove",
+  (e) => {
+    if (!isPainting) return;
+    if (e.touches.length !== 1) return;
 
-pixel.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  const t = e.touches[0];
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  if (el && el.classList.contains("pixel")) {
-    paintPixel(el);
-  }
-});
+    e.preventDefault();
 
-      pixel.addEventListener("touchmove", (e) => {
-        e.preventDefault();
-        const t = e.touches[0];
-        const el = document.elementFromPoint(t.clientX, t.clientY);
-        if (el && el.classList.contains("pixel")) {
-          paintPixel(el);
-        }
-      });
+    const t = e.touches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el && el.classList.contains("pixel")) {
+      paintPixel(el);
+    }
+  },
+  { passive: false }
+);
 
       grid.appendChild(pixel);
     }
   }
+}
+
+if ("ontouchstart" in window && !localStorage.getItem("touchTipShown")) {
+  alert("提示：\n单指上色\n双指滚动 / 缩放");
+  localStorage.setItem("touchTipShown", "1");
 }
 
 /* ===== 结束拖拉 ===== */
@@ -171,6 +177,17 @@ function redo() {
 /* ===== 选择颜色 ===== */
 function setColor(color) {
   currentColor = color;
+
+  // 移除所有颜色按钮的 active
+  document.querySelectorAll(".color").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  // 给当前点击的颜色按钮加 active
+  const activeBtn = document.querySelector(`.color.${color}`);
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+  }
 }
 
 /* ===== 导出 PNG ===== */
@@ -210,3 +227,5 @@ function setOrientation(mode) {
 
 // ⭐⭐ 非常重要：第一次载入要执行一次
 buildGrid();
+
+setColor("black");
