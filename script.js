@@ -1,5 +1,5 @@
 /* ===============================
-   基本状态
+   全局状态
 ================================ */
 let undoStack = [];
 let redoStack = [];
@@ -7,87 +7,89 @@ let redoStack = [];
 let isPainting = false;
 let currentStroke = null;
 
+let scale = 1;
+let offsetX = 0;
+let offsetY = 0;
+
+let isPanning = false;
+let panStart = { x: 0, y: 0 };
+
+let lastTouchDistance = null;
+let lastTouchCenter = null;
+
 const grid = document.getElementById("grid");
 
-let GRID = {
-  cols: 10,
-  rows: 15
-};
-
+let GRID = { cols: 10, rows: 15 };
 let currentColor = "black";
+
+/* ===============================
+   Transform
+================================ */
+function updateTransform() {
+  grid.style.transform =
+    `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+}
 
 /* ===============================
    建立网格
 ================================ */
 function buildGrid() {
   grid.innerHTML = "";
-  grid.style.gridTemplateColumns = `repeat(${GRID.cols}, var(--cell-size))`;
+  grid.style.gridTemplateColumns =
+    `repeat(${GRID.cols}, var(--cell-size))`;
 
   for (let r = 0; r < GRID.rows; r++) {
     for (let c = 0; c < GRID.cols; c++) {
-      const pixel = document.createElement("div");
-      pixel.className = "pixel white";
+      const p = document.createElement("div");
+      p.className = "pixel white";
+      p.dataset.color = "white";
+      p.dataset.label = `${String.fromCharCode(65 + r)}${c + 1}`;
 
-      const rowLabel = String.fromCharCode(65 + r);
-      const colLabel = c + 1;
-      pixel.dataset.label = `${rowLabel}${colLabel}`;
-      pixel.dataset.color = "white";
-
-      /* ===== 桌面 ===== */
-      pixel.addEventListener("mousedown", () => {
+      // 桌面画画
+      p.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
         startStroke();
-        paintPixel(pixel);
+        paintPixel(p);
       });
 
-      pixel.addEventListener("mouseenter", () => {
-        if (isPainting) paintPixel(pixel);
+      p.addEventListener("mouseenter", () => {
+        if (isPainting) paintPixel(p);
       });
 
-      /* ===== 手机：单指画，双指交给浏览器 ===== */
-      pixel.addEventListener("touchstart", (e) => {
+      // 手机单指画
+      p.addEventListener("touchstart", (e) => {
         if (e.touches.length !== 1) return;
-
         startStroke();
-        paintPixel(pixel);
-      });
+        paintPixel(p);
+      }, { passive: true });
 
-      pixel.addEventListener(
-        "touchmove",
-        (e) => {
-          if (!isPainting) return;
-          if (e.touches.length !== 1) return;
+      p.addEventListener("touchmove", (e) => {
+        if (!isPainting || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        if (el?.classList.contains("pixel")) paintPixel(el);
+      }, { passive: true });
 
-          const t = e.touches[0];
-          const el = document.elementFromPoint(t.clientX, t.clientY);
-          if (el && el.classList.contains("pixel")) {
-            paintPixel(el);
-          }
-        },
-        { passive: true } // ⭐ 允许双指滚动
-      );
-
-      grid.appendChild(pixel);
+      grid.appendChild(p);
     }
   }
+
+  updateTransform();
 }
 
 /* ===============================
-   开始 / 结束一笔
+   笔画
 ================================ */
 function startStroke() {
   isPainting = true;
-  currentStroke = {
-    actions: [],
-    changed: new Set()
-  };
+  currentStroke = { actions: [], changed: new Set() };
 }
 
 function finishStroke() {
   if (!isPainting) return;
-
   isPainting = false;
 
-  if (currentStroke && currentStroke.actions.length > 0) {
+  if (currentStroke.actions.length) {
     undoStack.push(currentStroke);
     redoStack = [];
   }
@@ -96,41 +98,142 @@ function finishStroke() {
 }
 
 document.addEventListener("mouseup", finishStroke);
-document.addEventListener("touchend", finishStroke);
+document.addEventListener("touchend", () => {
+  finishStroke();
+  lastTouchDistance = null;
+  lastTouchCenter = null;
+});
 
 /* ===============================
-   上色逻辑
+   上色
 ================================ */
-function paintPixel(pixel) {
+function paintPixel(p) {
   if (!currentStroke) return;
+  if (p.dataset.color === currentColor) return;
+  if (currentStroke.changed.has(p)) return;
 
-  const prevColor = pixel.dataset.color || "white";
-  if (prevColor === currentColor) return;
-  if (currentStroke.changed.has(pixel)) return;
-
-  currentStroke.changed.add(pixel);
-
+  currentStroke.changed.add(p);
   currentStroke.actions.push({
-    pixel,
-    from: prevColor,
+    pixel: p,
+    from: p.dataset.color,
     to: currentColor
   });
 
-  pixel.className = `pixel ${currentColor}`;
-  pixel.dataset.color = currentColor;
+  p.className = `pixel ${currentColor}`;
+  p.dataset.color = currentColor;
+}
+
+function setColor(color) {
+  currentColor = color;
+
+  document.querySelectorAll(".color").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  const btn = document.querySelector(`.color.${color}`);
+  if (btn) btn.classList.add("active");
 }
 
 /* ===============================
-   Undo / Redo（整笔）
+   手机：双指缩放 / 拖动画布
+================================ */
+grid.addEventListener("touchmove", (e) => {
+  if (e.touches.length !== 2) return;
+  e.preventDefault();
+
+  isPainting = false;
+  currentStroke = null;
+
+  const [t1, t2] = e.touches;
+  const dx = t2.clientX - t1.clientX;
+  const dy = t2.clientY - t1.clientY;
+  const dist = Math.hypot(dx, dy);
+
+  const cx = (t1.clientX + t2.clientX) / 2;
+  const cy = (t1.clientY + t2.clientY) / 2;
+
+  if (lastTouchDistance) {
+    scale *= dist / lastTouchDistance;
+    scale = Math.min(Math.max(scale, 0.5), 4);
+  }
+
+  if (lastTouchCenter) {
+    offsetX += cx - lastTouchCenter.x;
+    offsetY += cy - lastTouchCenter.y;
+  }
+
+  lastTouchDistance = dist;
+  lastTouchCenter = { x: cx, y: cy };
+
+  updateTransform();
+}, { passive: false });
+
+/* ===============================
+   缩放 / 平移
+================================ */
+
+// 滚轮缩放（电脑）
+grid.addEventListener("wheel", (e) => {
+  e.preventDefault();
+
+  const prev = scale;
+  scale += -e.deltaY * 0.001;
+  scale = Math.min(Math.max(scale, 0.5), 4);
+
+  const rect = grid.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  offsetX -= mx * (scale / prev - 1);
+  offsetY -= my * (scale / prev - 1);
+
+  updateTransform();
+}, { passive: false });
+
+/* ===============================
+   电脑：右键拖动画布
+================================ */
+grid.addEventListener("mousedown", (e) => {
+  if (e.button !== 2) return;
+
+  isPanningMouse = true;
+  lastMouse = { x: e.clientX, y: e.clientY };
+  e.preventDefault();
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!isPanningMouse) return;
+
+  offsetX += e.clientX - lastMouse.x;
+  offsetY += e.clientY - lastMouse.y;
+  lastMouse = { x: e.clientX, y: e.clientY };
+
+  updateTransform();
+});
+
+document.addEventListener("mouseup", () => {
+  isPanningMouse = false;
+  lastMouse = null;
+});
+
+grid.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+});
+
+/* ===============================
+   Undo / Redo
 ================================ */
 function undo() {
   const stroke = undoStack.pop();
   if (!stroke) return;
 
   redoStack.push(stroke);
-
   stroke.actions.forEach(a => {
-    a.pixel.className = `pixel ${a.from}`;
+    a.pixel.classList.remove(
+      "white","black","gray","red","orange",
+      "yellow","green","blue","pink","purple"
+    );
+    a.pixel.classList.add(a.from);
     a.pixel.dataset.color = a.from;
   });
 }
@@ -140,9 +243,12 @@ function redo() {
   if (!stroke) return;
 
   undoStack.push(stroke);
-
   stroke.actions.forEach(a => {
-    a.pixel.className = `pixel ${a.to}`;
+    a.pixel.classList.remove(
+      "white","black","gray","red","orange",
+      "yellow","green","blue","pink","purple"
+    );
+    a.pixel.classList.add(a.to);
     a.pixel.dataset.color = a.to;
   });
 }
@@ -150,56 +256,11 @@ function redo() {
 /* ===============================
    工具
 ================================ */
-function setColor(color) {
-  currentColor = color;
-
-  document.querySelectorAll(".color").forEach(btn => {
-    btn.classList.remove("active");
-  });
-
-  const activeBtn = document.querySelector(`.color.${color}`);
-  if (activeBtn) activeBtn.classList.add("active");
-}
-
-function eraseAll() {
-  document.querySelectorAll(".pixel").forEach(p => {
-    p.className = "pixel white";
-    p.dataset.color = "white";
-  });
-
-  undoStack = [];
-  redoStack = [];
-}
-
 function setOrientation(mode) {
-  if (mode === "portrait") {
-    GRID = { cols: 10, rows: 15 };
-  } else {
-    GRID = { cols: 15, rows: 10 };
-  }
-
+  GRID = mode === "portrait"
+    ? { cols: 10, rows: 15 }
+    : { cols: 15, rows: 10 };
   buildGrid();
-}
-
-/* ===============================
-   导出 PNG
-================================ */
-function exportPNG() {
-  const exportArea = document.getElementById("export-area");
-  const gridEl = document.getElementById("grid");
-
-  exportArea.style.width = gridEl.scrollWidth + "px";
-  exportArea.style.height = gridEl.scrollHeight + "px";
-
-  html2canvas(exportArea, {
-    backgroundColor: "#ffffff",
-    scale: 3
-  }).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "pixcore-design.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
 }
 
 /* ===============================
@@ -209,6 +270,6 @@ buildGrid();
 setColor("black");
 
 if ("ontouchstart" in window && !localStorage.getItem("touchTipShown")) {
-  alert("How to use:\n• One finger: Draw\n• Two fingers: Scroll / Zoom");
+  alert("How to use:\n• One finger: Draw\n• Two fingers: Zoom & Pan");
   localStorage.setItem("touchTipShown", "1");
 }

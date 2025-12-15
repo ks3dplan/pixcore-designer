@@ -8,45 +8,61 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* ⭐⭐⭐ 必须 */
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+}
+
+/* 画布视窗 */
+.canvas-viewport {
+  display: inline-block;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #ccc;
+  height: calc(100vh - 140px);
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+    outline: 2px solid gray;     /* ⭐ 画布可视范围 */
+  background: #bfc6c9;
+  outline-offset: -2px;
 }
 
 .app {
-  padding: 20px;
+  padding: 20px 32px; /* 左右多一点 */
 }
+
 
 /* ===== 标题 ===== */
 .app-title {
   font-size: 26px;
   font-weight: 700;
   margin-bottom: 16px;
+  margin-left: 8px;
 }
 
 .action-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: 8px;
   margin-bottom: 16px; /* ⭐ 加这行 */
 }
 
 /* ===== 方向 ===== */
-.orientation-bar {
+
+.orientation-row {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
-}
-
-.orientation-bar button {
-  padding: 10px 18px;
-  font-size: 16px;
-  font-weight: 600;
+  margin-left: 8px;
 }
 
 /* ===== 主布局 ===== */
 .app-layout {
   display: flex;
-  gap: 24px;
   align-items: flex-start;
+  gap: 2px;        /* ⭐ 建议 8~12 */
+  margin-left: 8px;
 }
 
 /* ===== 左侧颜色 ===== */
@@ -54,6 +70,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-left: 8px;
+  margin-top: 16px;
 }
 
 .color {
@@ -108,8 +126,13 @@ html, body {
 /* grid 本身 */
 #grid {
   display: grid;
+  width: max-content;   /* ⭐ 关键 */
+  height: max-content;
   gap: var(--cell-gap);
-  width: max-content;    /* ⭐⭐ 关键 */
+  padding: 10px;          /* ⭐ grid 白色 background 的 offset */
+  background: #ffffff;   /* 白色画布 */
+  box-sizing: border-box;
+  
 }
 
 .top-tools {
@@ -122,37 +145,39 @@ html, body {
   padding: 8px 18px;
 }
 
+/* pixel */
 .pixel {
   width: var(--cell-size);
   height: var(--cell-size);
-  background: #ffffff;
   border: 1px solid #ccc;
+  background: #fff;
   position: relative;
   cursor: pointer;
-  touch-action: none; /* ⭐ 单指不会触发浏览器行为 */
+  touch-action: none; /* 关键 */
 }
 
 .pixel::after {
   content: attr(data-label);
   position: absolute;
-  bottom: 2px;
   right: 3px;
+  bottom: 2px;
   font-size: 7px;
   color: #999;
   pointer-events: none;
 }
 
-/* pixel 颜色 */
-.pixel.white  { background: #ffffff; }
-.pixel.black  { background: #000000; }
-.pixel.gray   { background: #bfc6c9; }
-.pixel.red    { background: #e53935; }
-.pixel.orange { background: #ff8800; }
-.pixel.yellow { background: #ffcc00; }
-.pixel.green  { background: #00b894; }
-.pixel.blue   { background: #1565c0; }
-.pixel.pink   { background: #ff6fae; }
-.pixel.purple { background: #7e57c2; }
+
+/* 颜色 */
+.pixel.white  { background:#fff; }
+.pixel.black  { background:#000; }
+.pixel.gray   { background:#bfc6c9; }
+.pixel.red    { background:#e53935; }
+.pixel.orange { background:#ff8800; }
+.pixel.yellow { background:#ffcc00; }
+.pixel.green  { background:#00b894; }
+.pixel.blue   { background:#1565c0; }
+.pixel.pink   { background:#ff6fae; }
+.pixel.purple { background:#7e57c2; }
 
 /* ===== 右侧 ===== */
 .right-panel {
@@ -182,4 +207,10 @@ html, body {
 
   /* ⭐ 只允许双指 pan / zoom */
   touch-action: pan-x pan-y pinch-zoom;
+}
+
+/* 当前选中颜色高亮 */
+.color.active {
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 3px #000000; /* 黑色外圈 */
 }
