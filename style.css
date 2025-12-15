@@ -176,9 +176,21 @@ html, body {
 }
 
 #grid-wrapper {
-  overflow: auto;              /* ⭐ 允许滚动 */
+  overflow: auto;
   max-width: 100vw;
   max-height: 80vh;
 
-  touch-action: pan-x pan-y;   /* ⭐ 允许双指滚 / 缩 */
+  /* ⭐ 只允许双指 pan / zoom */
+  touch-action: pan-x pan-y pinch-zoom;
 }
+
+// 🚫 禁止单指滚动（只保留画画）
+document.getElementById("grid-wrapper").addEventListener(
+  "touchmove",
+  (e) => {
+    if (e.touches.length === 1) {
+      e.preventDefault(); // ⭐ 禁止单指滚动
+    }
+  },
+  { passive: false }
+);

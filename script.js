@@ -89,7 +89,7 @@ pixel.addEventListener(
 }
 
 if ("ontouchstart" in window && !localStorage.getItem("touchTipShown")) {
-  alert("How to Used：\n One-finger: Draw\n Two-finger: Scroll / Zoom");
+  alert("How to Used：\n One-finger(Draw)\n Two-finger(Scroll / Zoom)");
   localStorage.setItem("touchTipShown", "1");
 }
 
